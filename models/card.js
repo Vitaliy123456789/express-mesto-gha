@@ -1,4 +1,4 @@
-const mongoose = require('mongoose')
+const mongoose = require('mongoose');
 
 const userSchema = new mongoose.Schema({
   name: {
@@ -16,13 +16,13 @@ const userSchema = new mongoose.Schema({
   },
   likes: {
     type: [
-      { type: mongoose.Schema.Types.ObjectId, ref: 'user' }
-      ],
+      { type: mongoose.Schema.Types.ObjectId, ref: 'user' },
+    ],
   },
-  createdAt:{
+  createdAt: {
     type: Date,
-    default: Date.now
-  }
-})
+    default: Date.now,
+  },
+});
 
 module.exports = mongoose.model('card', userSchema);
