@@ -1,73 +1,79 @@
 const cardModel = require('../models/card');
 
+const notFound = 404;
+const ok = 200;
+const internalServerError = 500;
+const badRequest = 400;
+const created = 201;
+
 const getCard = (req, res) => {
   cardModel.find()
-    .then((r) => res.status(200).send(r))
-    .catch(() => { res.status(500).send({ message: 'Server Error' }); });
+    .then((card) => res.status(ok).send(card))
+    .catch(() => { res.status(internalServerError).send({ message: 'Server Error' }); });
 };
 
 const deleteCard = (req, res) => {
   const { cardId } = req.params;
   return cardModel.findByIdAndDelete(cardId)
-    .then((r) => {
-      if (!r) {
-        return res.status(404).send({ message: 'invalid data' });
+    .then((card) => {
+      if (!card) {
+        return res.status(notFound).send({ message: 'invalid data' });
       }
-      return res.status(200).send(r);
+      return res.status(ok).send(card);
     })
-    .catch((e) => {
-      if (e.name === 'CastError') {
-        return res.status(400).send({ message: 'invalid ID' });
+    .catch((err) => {
+      if (err.name === 'CastError') {
+        return res.status(badRequest).send({ message: 'invalid ID' });
       }
-      return res.status(500).send({ message: 'Server Error' });
+      return res.status(internalServerError).send({ message: 'Server Error' });
     });
 };
 
 const createCard = (req, res) => {
   const { name, link } = req.body;
   cardModel.create({ name, link })
-    .then((r) => res.status(201).send(r))
-    .catch((e) => {
-      if (e.name === 'ValidationError') {
-        return res.status(400).send({ message: 'invalid data' });
+    .then((card) => res.status(created).send(card))
+    .catch((err) => {
+      if (err.name === 'ValidationError') {
+        return res.status(badRequest).send({ message: 'invalid data' });
       }
-      return res.status(500).send({ message: 'Server Error' });
+      return res.status(internalServerError).send({ message: 'Server Error' });
     });
 };
 
 const likeCard = (req, res) => {
   const { cardId } = req.params;
   const userId = req.user._id;
-  return cardModel.findByIdAndUpdate(cardId, { $addToSet: { likes: userId } })
-    .then((r) => {
-      if (!r) {
-        return res.status(404).send({ message: 'invalid data' });
+  return cardModel.findByIdAndUpdate(cardId, { $addToSet: { likes: userId } }, { new: true })
+    .then((card) => {
+      if (!card) {
+        return res.status(notFound).send({ message: 'invalid data' });
       }
-      return res.status(200).send(r);
+      return res.status(ok).send(card);
     })
-    .catch((e) => {
-      if (e.name === 'CastError') {
-        return res.status(400).send({ message: 'invalid ID' });
+    .catch((err) => {
+      if (err.name === 'CastError') {
+        return res.status(badRequest).send({ message: 'invalid ID' });
       }
-      return res.status(500).send({ message: 'Server Error' });
+      return res.status(internalServerError).send({ message: 'Server Error' });
     });
 };
 
 const deletelikeCard = (req, res) => {
   const { cardId } = req.params;
   const userId = req.user._id;
-  return cardModel.findByIdAndUpdate(cardId, { $pull: { likes: userId } })
-    .then((r) => {
-      if (!r) {
-        return res.status(404).send({ message: 'invalid data' });
+  return cardModel.findByIdAndUpdate(cardId, { $pull: { likes: userId } }, { new: true })
+    .then((card) => {
+      if (!card) {
+        return res.status(notFound).send({ message: 'invalid data' });
       }
-      return res.status(200).send(r);
+      return res.status(ok).send(card);
     })
-    .catch((e) => {
-      if (e.name === 'CastError') {
-        return res.status(400).send({ message: 'invalid ID' });
+    .catch((err) => {
+      if (err.name === 'CastError') {
+        return res.status(badRequest).send({ message: 'invalid ID' });
       }
-      return res.status(500).send({ message: 'Server Error' });
+      return res.status(internalServerError).send({ message: 'Server Error' });
     });
 };
 

@@ -1,12 +1,15 @@
 const userModel = require('../models/user');
 
+const notFound = 404;
+const ok = 200;
+const internalServerError = 500;
+const badRequest = 400;
+const created = 201;
+
 const getUsers = (req, res) => {
-  userModel.find().then((r) => res.status(200).send(r))
-    .catch((e) => {
-      if (e.name === 'ValidationError') {
-        return res.status(400).send({ message: 'invalid data' });
-      }
-      return res.status(500).send({ message: 'Server Error' });
+  userModel.find().then((user) => res.status(ok).send(user))
+    .catch(() => {
+      res.status(internalServerError).send({ message: 'Server Error' });
     });
 };
 
@@ -14,20 +17,17 @@ const getUsersById = (req, res) => {
   const { userId } = req.params;
   return userModel
     .findById(userId)
-    .then((r) => {
-      if (!r) {
-        return res.status(404).send({ message: 'invalid data' });
+    .then((user) => {
+      if (!user) {
+        return res.status(notFound).send({ message: 'invalid data' });
       }
-      return res.status(200).send(r);
+      return res.status(ok).send(user);
     })
-    .catch((e) => {
-      if (e.name === 'ValidationError') {
-        return res.status(404).send({ message: 'invalid data' });
+    .catch((err) => {
+      if (err.name === 'CastError') {
+        return res.status(badRequest).send({ message: 'invalid ID' });
       }
-      if (e.name === 'CastError') {
-        return res.status(400).send({ message: 'invalid ID' });
-      }
-      return res.status(500).send({ message: 'Server Error' });
+      return res.status(internalServerError).send({ message: 'Server Error' });
     });
 };
 
@@ -35,12 +35,12 @@ const createUser = (req, res) => {
   const { name, about, avatar } = req.body;
   return userModel
     .create({ name, about, avatar })
-    .then((r) => res.status(201).send(r))
-    .catch((e) => {
-      if (e.name === 'ValidationError') {
-        return res.status(400).send({ message: 'invalid data' });
+    .then((user) => res.status(created).send(user))
+    .catch((err) => {
+      if (err.name === 'ValidationError') {
+        return res.status(badRequest).send({ message: 'invalid data' });
       }
-      return res.status(500).send({ message: 'Server Error' });
+      return res.status(internalServerError).send({ message: 'Server Error' });
     });
 };
 
@@ -53,17 +53,17 @@ const patchUser = (req, res) => {
       { name, about },
       { new: true, runValidators: true },
     )
-    .then((r) => {
-      if (!r) {
-        return res.status(404).send({ message: 'invalid ID' });
+    .then((user) => {
+      if (!user) {
+        return res.status(notFound).send({ message: 'invalid ID' });
       }
-      return res.status(200).send(r);
+      return res.status(ok).send(user);
     })
-    .catch((e) => {
-      if (e.name === 'ValidationError') {
-        return res.status(400).send({ message: 'invalid data' });
+    .catch((err) => {
+      if (err.name === 'ValidationError') {
+        return res.status(badRequest).send({ message: 'invalid data' });
       }
-      return res.status(500).send({ message: 'Server Error' });
+      return res.status(internalServerError).send({ message: 'Server Error' });
     });
 };
 
@@ -72,17 +72,17 @@ const patchUserAvatar = (req, res) => {
   const userId = req.user._id;
   return userModel
     .findByIdAndUpdate(userId, { avatar }, { new: true, runValidators: true })
-    .then((r) => {
-      if (!r) {
-        return res.status(404).send({ message: 'invalid ID' });
+    .then((user) => {
+      if (!user) {
+        return res.status(notFound).send({ message: 'invalid ID' });
       }
-      return res.status(200).send(r);
+      return res.status(ok).send(user);
     })
-    .catch((e) => {
-      if (e.name === 'ValidationError') {
-        return res.status(400).send({ message: 'invalid data' });
+    .catch((err) => {
+      if (err.name === 'ValidationError') {
+        return res.status(badRequest).send({ message: 'invalid data' });
       }
-      return res.status(500).send({ message: 'Server Error' });
+      return res.status(internalServerError).send({ message: 'Server Error' });
     });
 };
 
