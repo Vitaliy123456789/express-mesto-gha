@@ -12,7 +12,7 @@ const deleteCard = (req, res) => {
     .then((r) => res.status(200).send(r))
     .catch((e) => {
       if (e.name === 'CastError') {
-        return res.status(400).send({ message: 'invalid ID' });
+        return res.status(404).send({ message: 'invalid ID' });
       }
       return res.status(500).send({ message: 'Server Error' });
     });
@@ -24,7 +24,7 @@ const createCard = (req, res) => {
     .then((r) => res.status(201).send(r))
     .catch((e) => {
       if (e.name === 'ValidationError') {
-        return res.status(400).send({ message: 'invalid data' });
+        return res.status(404).send({ message: 'invalid data' });
       }
       return res.status(500).send({ message: 'Server Error' });
     });
@@ -36,8 +36,11 @@ const likeCard = (req, res) => {
   return cardModel.findByIdAndUpdate(cardId, { $addToSet: { likes: userId } })
     .then((r) => res.status(200).send(r))
     .catch((e) => {
+      if (e.name === 'ValidationError') {
+        return res.status(400).send({ message: 'invalid data' });
+      }
       if (e.name === 'CastError') {
-        return res.status(400).send({ message: 'invalid ID' });
+        return res.status(404).send({ message: 'invalid ID' });
       }
       return res.status(500).send({ message: 'Server Error' });
     });
@@ -49,8 +52,11 @@ const DeletelikeCard = (req, res) => {
   return cardModel.findByIdAndUpdate(cardId, { $pull: { likes: userId } })
     .then((r) => res.status(200).send(r))
     .catch((e) => {
+      if (e.name === 'ValidationError') {
+        return res.status(400).send({ message: 'invalid data' });
+      }
       if (e.name === 'CastError') {
-        return res.status(400).send({ message: 'invalid ID' });
+        return res.status(404).send({ message: 'invalid ID' });
       }
       return res.status(500).send({ message: 'Server Error' });
     });

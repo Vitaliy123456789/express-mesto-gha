@@ -16,6 +16,9 @@ const getUsersById = (req, res) => {
     .findById(userId)
     .then((r) => res.status(200).send(r))
     .catch((e) => {
+      if (e.name === 'ValidationError') {
+        return res.status(400).send({ message: 'invalid data' });
+      }
       if (e.name === 'CastError') {
         return res.status(404).send({ message: 'invalid ID' });
       }
@@ -47,8 +50,11 @@ const patchUser = (req, res) => {
     )
     .then((r) => res.status(200).send(r))
     .catch((e) => {
+      if (e.name === 'ValidationError') {
+        return res.status(400).send({ message: 'invalid data' });
+      }
       if (e.name === 'CastError') {
-        return res.status(400).send({ message: 'invalid ID' });
+        return res.status(404).send({ message: 'invalid ID' });
       }
       return res.status(500).send({ message: 'Server Error' });
     });
@@ -61,8 +67,11 @@ const patchUserAvatar = (req, res) => {
     .findByIdAndUpdate(userId, { avatar }, { new: true, runValidators: true })
     .then((r) => res.status(200).send(r))
     .catch((e) => {
+      if (e.name === 'ValidationError') {
+        return res.status(400).send({ message: 'invalid data' });
+      }
       if (e.name === 'CastError') {
-        return res.status(400).send({ message: 'invalid ID' });
+        return res.status(404).send({ message: 'invalid ID' });
       }
       return res.status(500).send({ message: 'Server Error' });
     });
