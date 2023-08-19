@@ -24,6 +24,10 @@ app.use((req, res, next) => {
 
 app.use(router);
 
+app.use((req, res) => {
+  res.status(404).send({ message: 'Page Not Found' });
+});
+
 app.listen(port, () => {
   console.log(`Example app listening on port ${port}`);
 });
