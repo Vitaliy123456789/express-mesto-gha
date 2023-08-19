@@ -56,8 +56,11 @@ const patchUser = (req, res) => {
       }
       return res.status(200).send(r);
     })
-    .catch(() => {
-      res.status(500).send({ message: 'Server Error' });
+    .catch((e) => {
+      if (e.name === 'CastError') {
+        return res.status(400).send({ message: 'invalid ID' });
+      }
+      return res.status(500).send({ message: 'Server Error' });
     });
 };
 
@@ -72,8 +75,11 @@ const patchUserAvatar = (req, res) => {
       }
       return res.status(200).send(r);
     })
-    .catch(() => {
-      res.status(500).send({ message: 'Server Error' });
+    .catch((e) => {
+      if (e.name === 'CastError') {
+        return res.status(400).send({ message: 'invalid ID' });
+      }
+      return res.status(500).send({ message: 'Server Error' });
     });
 };
 
