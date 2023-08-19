@@ -14,13 +14,18 @@ const getUsersById = (req, res) => {
   const { userId } = req.params;
   return userModel
     .findById(userId)
-    .then((r) => res.status(200).send(r))
+    .then((r) => {
+      if (!r) {
+        return res.status(404).send({ message: 'invalid data' });
+      }
+      return res.status(200).send(r);
+    })
     .catch((e) => {
       if (e.name === 'ValidationError') {
-        return res.status(400).send({ message: 'invalid data' });
+        return res.status(404).send({ message: 'invalid data' });
       }
       if (e.name === 'CastError') {
-        return res.status(404).send({ message: 'invalid ID' });
+        return res.status(400).send({ message: 'invalid ID' });
       }
       return res.status(500).send({ message: 'Server Error' });
     });

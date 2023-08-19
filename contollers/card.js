@@ -24,7 +24,7 @@ const createCard = (req, res) => {
     .then((r) => res.status(201).send(r))
     .catch((e) => {
       if (e.name === 'ValidationError') {
-        return res.status(404).send({ message: 'invalid data' });
+        return res.status(400).send({ message: 'invalid data' });
       }
       return res.status(500).send({ message: 'Server Error' });
     });
@@ -34,29 +34,33 @@ const likeCard = (req, res) => {
   const { cardId } = req.params;
   const userId = req.user._id;
   return cardModel.findByIdAndUpdate(cardId, { $addToSet: { likes: userId } })
-    .then((r) => res.status(200).send(r))
-    .catch((e) => {
-      if (e.name === 'ValidationError') {
-        return res.status(400).send({ message: 'invalid data' });
+    .then((r) => {
+      if (!r) {
+        return res.status(404).send({ message: 'invalid data' });
       }
+      return res.status(200).send(r);
+    })
+    .catch((e) => {
       if (e.name === 'CastError') {
-        return res.status(404).send({ message: 'invalid ID' });
+        return res.status(400).send({ message: 'invalid ID' });
       }
       return res.status(500).send({ message: 'Server Error' });
     });
 };
 
-const DeletelikeCard = (req, res) => {
+const deletelikeCard = (req, res) => {
   const { cardId } = req.params;
   const userId = req.user._id;
   return cardModel.findByIdAndUpdate(cardId, { $pull: { likes: userId } })
-    .then((r) => res.status(200).send(r))
-    .catch((e) => {
-      if (e.name === 'ValidationError') {
-        return res.status(400).send({ message: 'invalid data' });
+    .then((r) => {
+      if (!r) {
+        return res.status(404).send({ message: 'invalid data' });
       }
+      return res.status(200).send(r);
+    })
+    .catch((e) => {
       if (e.name === 'CastError') {
-        return res.status(404).send({ message: 'invalid ID' });
+        return res.status(400).send({ message: 'invalid ID' });
       }
       return res.status(500).send({ message: 'Server Error' });
     });
@@ -67,5 +71,5 @@ module.exports = {
   deleteCard,
   createCard,
   likeCard,
-  DeletelikeCard,
+  deletelikeCard,
 };
