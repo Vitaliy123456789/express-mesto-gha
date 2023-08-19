@@ -33,8 +33,8 @@ const createCard = (req, res) => {
   const { name, link } = req.body;
   cardModel.create({ name, link })
     .then((card) => res.status(created).send(card))
-    .catch((e) => {
-      if (e.name === 'ValidationError') {
+    .catch((err) => {
+      if (err.name === 'ValidationError') {
         return res.status(badRequest).send({ message: 'invalid data' });
       }
       return res.status(internalServerError).send({ message: 'Server Error' });
