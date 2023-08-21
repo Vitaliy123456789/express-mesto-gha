@@ -31,9 +31,11 @@ const deleteCard = (req, res) => {
 
 const createCard = (req, res) => {
   const { name, link } = req.body;
-  cardModel.create({ name, link })
+  const owner = req.user._id;
+  cardModel.create({ name, link, owner })
     .then((card) => res.status(created).send(card))
     .catch((err) => {
+      console.log(err);
       if (err.name === 'ValidationError') {
         return res.status(badRequest).send({ message: 'invalid data' });
       }
@@ -43,8 +45,8 @@ const createCard = (req, res) => {
 
 const likeCard = (req, res) => {
   const { cardId } = req.params;
-  const userId = req.user._id;
-  return cardModel.findByIdAndUpdate(cardId, { $addToSet: { likes: userId } }, { new: true })
+  const owner = req.user._id;
+  return cardModel.findByIdAndUpdate(cardId, { $addToSet: { likes: owner } }, { new: true })
     .then((card) => {
       if (!card) {
         return res.status(notFound).send({ message: 'invalid data' });
@@ -61,8 +63,8 @@ const likeCard = (req, res) => {
 
 const deletelikeCard = (req, res) => {
   const { cardId } = req.params;
-  const userId = req.user._id;
-  return cardModel.findByIdAndUpdate(cardId, { $pull: { likes: userId } }, { new: true })
+  const owner = req.user._id;
+  return cardModel.findByIdAndUpdate(cardId, { $pull: { likes: owner } }, { new: true })
     .then((card) => {
       if (!card) {
         return res.status(notFound).send({ message: 'invalid data' });

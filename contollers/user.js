@@ -46,10 +46,10 @@ const createUser = (req, res) => {
 
 const patchUser = (req, res) => {
   const { name, about } = req.body;
-  const userId = req.user._id;
+  const owner = req.user._id;
   return userModel
     .findByIdAndUpdate(
-      userId,
+      owner,
       { name, about },
       { new: true, runValidators: true },
     )
@@ -69,9 +69,9 @@ const patchUser = (req, res) => {
 
 const patchUserAvatar = (req, res) => {
   const { avatar } = req.body;
-  const userId = req.user._id;
+  const owner = req.user._id;
   return userModel
-    .findByIdAndUpdate(userId, { avatar }, { new: true, runValidators: true })
+    .findByIdAndUpdate(owner, { avatar }, { new: true, runValidators: true })
     .then((user) => {
       if (!user) {
         return res.status(notFound).send({ message: 'invalid ID' });
