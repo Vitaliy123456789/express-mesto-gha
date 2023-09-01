@@ -77,7 +77,7 @@ const patchUser = (req, res) => {
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        return res.status(badReqgiuest).send({ message: 'invalid data' });
+        return res.status(badRequest).send({ message: 'invalid data' });
       }
       return res.status(internalServerError).send({ message: 'Server Error' });
     });

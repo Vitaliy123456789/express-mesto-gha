@@ -24,7 +24,8 @@ app.post('/signup', createUser);
 app.use((req, res) => {
   res.status(notFound).send({ message: 'Page Not Found' });
 });
-app.use(router, auth);
+app.use(auth);
+app.use(router);
 app.listen(port, () => {
   console.log(`Example app listening on port ${port}`);
 });
