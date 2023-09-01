@@ -37,7 +37,7 @@ const createUser = (req, res) => {
   const {
     name, about, avatar, email, password,
   } = req.body;
-  if (!email || !password) {
+  if (!password) {
     res.status(400).send({ message: 'invalid data' });
   }
   bcrypt.hash(req.body.password, 10)
@@ -48,7 +48,9 @@ const createUser = (req, res) => {
       email,
       password: hash,
     }))
-    .then(() => res.status(created).send(name, about, avatar, email))
+    .then(() => res.status(created).send({
+      name, about, avatar, email,
+    }))
     .catch((err) => {
       if (err.name === 'ValidationError') {
         return res.status(badRequest).send({ message: 'invalid data' });
