@@ -53,7 +53,7 @@ const createUser = (req, res) => {
       if (err.name === 'ValidationError') {
         return res.status(badRequest).send({ message: 'invalid data' });
       }
-      if (err.code === 11000) {
+      if (err.name === 'MongoError' || err.code === 11000) {
         res.status(409).send({ message: 'Указанный email уже занят' });
       }
       return res.status(internalServerError).send({ message: 'Server Error' });
@@ -77,7 +77,7 @@ const patchUser = (req, res) => {
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        return res.status(badRequest).send({ message: 'invalid data' });
+        return res.status(badReqgiuest).send({ message: 'invalid data' });
       }
       return res.status(internalServerError).send({ message: 'Server Error' });
     });
@@ -118,7 +118,12 @@ const userInfo = (req, res) => {
   const userId = req.user._id;
 
   userModel.findById(userId)
-    .then((user) => res.send(user))
+    .then((user) => {
+      if (!user) {
+        return res.status(notFound).send({ message: 'invalid data' });
+      }
+      return res.status(ok).send(user);
+    })
     .catch((err) => {
       if (err.name === 'ValidationError') {
         return res.status(badRequest).send({ message: 'invalid data' });
