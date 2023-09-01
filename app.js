@@ -2,7 +2,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 const router = require('./routes/index');
 const { login, createUser } = require('./contollers/user');
-const auth = require('./middlewares/auth');
+// const auth = require('./middlewares/auth');
 
 const notFound = 404;
 
@@ -21,7 +21,6 @@ app.use(express.urlencoded({ extended: true }));
 
 app.post('/signin', login);
 app.post('/signup', createUser);
-app.use(auth);
 app.use(router);
 app.use((req, res) => {
   res.status(notFound).send({ message: 'Page Not Found' });
