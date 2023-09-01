@@ -1,3 +1,5 @@
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
 const userModel = require('../models/user');
 
 const notFound = 404;
@@ -32,13 +34,27 @@ const getUsersById = (req, res) => {
 };
 
 const createUser = (req, res) => {
-  const { name, about, avatar } = req.body;
-  return userModel
-    .create({ name, about, avatar })
+  const {
+    name, about, avatar, email, password,
+  } = req.body;
+  if (!email || !password) {
+    res.status(400).send({ message: 'invalid data' });
+  }
+  bcrypt.hash(req.body.password, 10)
+    .then((hash) => userModel.create({
+      name,
+      about,
+      avatar,
+      email,
+      password: hash,
+    }))
     .then((user) => res.status(created).send(user))
     .catch((err) => {
       if (err.name === 'ValidationError') {
         return res.status(badRequest).send({ message: 'invalid data' });
+      }
+      if (err.code === 11000) {
+        res.status(409).send({ message: 'Указанный email уже занят' });
       }
       return res.status(internalServerError).send({ message: 'Server Error' });
     });
@@ -85,6 +101,31 @@ const patchUserAvatar = (req, res) => {
       return res.status(internalServerError).send({ message: 'Server Error' });
     });
 };
+const login = (req, res) => {
+  const { email, password } = req.body;
+  return userModel.findUserByCredentials(email, password)
+    .then((user) => {
+      const token = jwt.sign({ _id: user._id }, 'some-secret-key', { expiresIn: '7d' });
+      res.send({
+        token,
+      })
+        .catch((err) => {
+          res.status(401).send({ message: err.message });
+        });
+    });
+};
+const userInfo = (req, res) => {
+  const userId = req.user._id;
+
+  userModel.findById(userId)
+    .then((user) => res.send(user))
+    .catch((err) => {
+      if (err.name === 'ValidationError') {
+        return res.status(badRequest).send({ message: 'invalid data' });
+      }
+      return res.status(internalServerError).send({ message: 'Server Error' });
+    });
+};
 
 module.exports = {
   getUsers,
@@ -92,4 +133,6 @@ module.exports = {
   createUser,
   patchUser,
   patchUserAvatar,
+  login,
+  userInfo,
 };

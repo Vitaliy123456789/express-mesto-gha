@@ -1,6 +1,8 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const router = require('./routes/index');
+const { login, createUser } = require('./contollers/user');
+const auth = require('./middlewares/auth');
 
 const notFound = 404;
 
@@ -16,16 +18,11 @@ const port = 3000;
 app.use(express.json());
 
 app.use(express.urlencoded({ extended: true }));
-app.use((req, res, next) => {
-  req.user = {
-    _id: '64db9ab7a80d6b490b495ac6',
-  };
 
-  next();
-});
-
+app.post('/signin', login);
+app.post('/signup', createUser);
+app.use(auth);
 app.use(router);
-
 app.use((req, res) => {
   res.status(notFound).send({ message: 'Page Not Found' });
 });
