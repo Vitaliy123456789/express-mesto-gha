@@ -37,9 +37,6 @@ const createUser = (req, res) => {
   const {
     name, about, avatar, email, password,
   } = req.body;
-  if (email) {
-    res.status(409).send({ message: 'email else password incorect' });
-  }
   if (!password) {
     res.status(400).send({ message: 'invalid data' });
   }
@@ -58,9 +55,9 @@ const createUser = (req, res) => {
       if (err.name === 'ValidationError') {
         return res.status(badRequest).send({ message: 'invalid data' });
       } if (err.name === 'MongoError' || err.code === 11000) {
-        res.status(409).send({ message: 'Указанный email уже занят' });
+        return res.status(409).send({ message: 'Указанный email уже занят' });
       }
-      return res.status(internalServerError).send({ message: 'Server Error' });
+      return res.status(500).send({ message: 'На сервере произошла ошибка' });
     });
 };
 
