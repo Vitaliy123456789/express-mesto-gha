@@ -40,6 +40,9 @@ const createUser = (req, res) => {
   if (email) {
     res.status(409).send({ message: 'email else password incorect' });
   }
+  if (!password) {
+    res.status(400).send({ message: 'invalid data' });
+  }
   bcrypt.hash(req.body.password, 10)
     .then((hash) => userModel.create({
       name,
