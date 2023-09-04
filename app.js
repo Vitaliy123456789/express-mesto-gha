@@ -1,6 +1,7 @@
-const { celebrate, Joi } = require('celebrate');
 const express = require('express');
 const mongoose = require('mongoose');
+const { celebrate, Joi } = require('celebrate');
+const { errors } = require('celebrate');
 const { login, createUser } = require('./contollers/user');
 const auth = require('./middlewares/auth');
 const user = require('./routes/user');
@@ -21,12 +22,6 @@ app.use(express.json());
 
 app.use(express.urlencoded({ extended: true }));
 
-app.post('/signin', celebrate({
-  body: Joi.object().keys({
-    email: Joi.string().required().email(),
-    password: Joi.string().required(),
-  }),
-}), login);
 app.post('/signup', celebrate({
   body: Joi.object().keys({
     name: Joi.string().default('Жак-Ив Кусто').min(2).max(30),
@@ -36,8 +31,15 @@ app.post('/signup', celebrate({
     password: Joi.string().required(),
   }),
 }), createUser);
+app.post('/signin', celebrate({
+  body: Joi.object().keys({
+    email: Joi.string().required().email(),
+    password: Joi.string().required(),
+  }),
+}), login);
 app.use('/users', auth, user);
 app.use('/cards', auth, card);
+app.use(errors());
 app.use((req, res) => {
   res.status(notFound).send({ message: 'Page Not Found' });
 });

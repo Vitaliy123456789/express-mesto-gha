@@ -1,4 +1,4 @@
-// const {celebrate, Joi} = require('celebrate');
+const { celebrate, Joi } = require('celebrate');
 
 const router = require('express').Router();
 const {
@@ -7,7 +7,12 @@ const {
 
 router.get('/users/:userId', getUsersById);
 router.get('/users', getUsers);
-router.patch('/users/me', patchUser);
+router.patch('/users/me', celebrate({
+  body: Joi.object().keys({
+    name: Joi.string().min(2).max(30),
+    about: Joi.string().min(2).max(30),
+  }),
+}), patchUser);
 router.patch('/users/me/avatar', patchUserAvatar);
 router.get('/users/me', userInfo);
 

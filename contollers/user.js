@@ -54,8 +54,7 @@ const createUser = (req, res) => {
     .catch((err) => {
       if (err.name === 'ValidationError') {
         return res.status(badRequest).send({ message: 'invalid data' });
-      }
-      if (err.name === 'MongoError' || err.code === 11000) {
+      } if (err.name === 'MongoError' || err.code === 11000) {
         res.status(409).send({ message: 'Указанный email уже занят' });
       }
       return res.status(internalServerError).send({ message: 'Server Error' });
@@ -105,7 +104,7 @@ const patchUserAvatar = (req, res) => {
 };
 const login = (req, res) => {
   const { email, password } = req.body;
-  return userModel.findUserByCredentials(email, password)
+  return userModel.findUserByCredentials({ email, password })
     .then((user) => {
       const token = jwt.sign({ _id: user._id }, 'some-secret-key', { expiresIn: '7d' });
       res.send({
@@ -118,7 +117,6 @@ const login = (req, res) => {
 };
 const userInfo = (req, res) => {
   const userId = req.user._id;
-
   userModel.findById(userId)
     .then((user) => {
       if (!user) {
