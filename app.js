@@ -1,6 +1,6 @@
+const { celebrate, Joi } = require('celebrate');
 const express = require('express');
 const mongoose = require('mongoose');
-const router = require('./routes/index');
 const { login, createUser } = require('./contollers/user');
 const auth = require('./middlewares/auth');
 const user = require('./routes/user');
@@ -21,8 +21,21 @@ app.use(express.json());
 
 app.use(express.urlencoded({ extended: true }));
 
-app.post('/signin', login);
-app.post('/signup', createUser);
+app.post('/signin', celebrate({
+  body: Joi.object().keys({
+    email: Joi.string().required().email(),
+    password: Joi.string().required(),
+  }),
+}), login);
+app.post('/signup', celebrate({
+  body: Joi.object().keys({
+    name: Joi.string().default('Жак-Ив Кусто').min(2).max(30),
+    about: Joi.string().default('Исследователь').min(2).max(30),
+    avatar: Joi.string().default('https://pictures.s3.yandex.net/resources/jacques-cousteau_1604399756.png'),
+    email: Joi.string().required().email(),
+    password: Joi.string().required(),
+  }),
+}), createUser);
 app.use('/users', auth, user);
 app.use('/cards', auth, card);
 app.use((req, res) => {
