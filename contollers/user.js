@@ -104,15 +104,14 @@ const patchUserAvatar = (req, res) => {
 };
 const login = (req, res) => {
   const { email, password } = req.body;
-  return userModel.findUserByCredentials({ email, password })
+  return userModel.findUserByCredentials(email, password)
     .then((user) => {
       const token = jwt.sign({ _id: user._id }, 'some-secret-key', { expiresIn: '7d' });
-      res.send({
-        token,
-      })
-        .catch((err) => {
-          res.status(401).send({ message: err.message });
-        });
+      res.send({ token });
+    })
+    .catch((err) => {
+      console.log(err);
+      res.status(401).send({ message: err.message });
     });
 };
 const userInfo = (req, res) => {

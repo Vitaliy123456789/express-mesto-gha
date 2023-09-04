@@ -7,7 +7,7 @@ const auth = require('./middlewares/auth');
 const user = require('./routes/user');
 const card = require('./routes/card');
 
-const notFound = 404;
+// const notFound = 404;
 
 mongoose.connect('mongodb://127.0.0.1:27017/mestodb', {
   useNewUrlParser: true,
@@ -40,9 +40,9 @@ app.post('/signin', celebrate({
 app.use('/users', auth, user);
 app.use('/cards', auth, card);
 app.use(errors());
-app.use((req, res) => {
-  res.status(notFound).send({ message: 'Page Not Found' });
-});
+// app.use((req, res) => {
+//   res.status(notFound).send({ message: 'Page Not Found' });
+// });
 app.listen(port, () => {
   console.log(`Example app listening on port ${port}`);
 });
