@@ -115,7 +115,7 @@ const login = (req, res) => {
 };
 const userInfo = (req, res) => {
   const userId = req.user._id;
-  userModel.findById(userId)
+  return userModel.findById(userId)
     .then((user) => res.status(ok).send(user))
     .catch((err) => {
       if (err.name === 'ValidationError') {
