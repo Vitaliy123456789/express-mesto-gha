@@ -110,14 +110,13 @@ const login = (req, res) => {
       res.send({ token });
     })
     .catch((err) => {
-      console.log(err);
       res.status(401).send({ message: err.message });
     });
 };
 const userInfo = (req, res) => {
   const userId = req.user._id;
   userModel.findById(userId)
-    .then((user) => { res.status(ok).send(user); })
+    .then((user) => res.status(ok).send(user))
     .catch((err) => {
       if (err.name === 'ValidationError') {
         return res.status(badRequest).send({ message: 'invalid data' });

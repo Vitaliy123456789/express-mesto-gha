@@ -14,10 +14,14 @@ const getCard = (req, res) => {
 
 const deleteCard = (req, res) => {
   const { cardId } = req.params;
+  const userId = req.user._id;
   return cardModel.findByIdAndDelete(cardId)
     .then((card) => {
       if (!card) {
         return res.status(notFound).send({ message: 'invalid data' });
+      }
+      if (userId !== card.owner.toString()) {
+        return res.status(403).send({ message: 'invalid data' });
       }
       return res.status(ok).send(card);
     })
