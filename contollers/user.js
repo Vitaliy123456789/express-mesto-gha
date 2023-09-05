@@ -107,6 +107,10 @@ const login = (req, res) => {
   return userModel.findUserByCredentials(email, password)
     .then((user) => {
       const token = jwt.sign({ _id: user._id }, 'some-secret-key', { expiresIn: '7d' });
+      res.cookie('jwt', token, {
+        maxAge: 3600000,
+        httpOnly: true,
+      });
       res.send({ token });
     })
     .catch((err) => {
@@ -114,9 +118,14 @@ const login = (req, res) => {
     });
 };
 const userInfo = (req, res) => {
-  const userId = req.user._id;
-  return userModel.findById(userId)
-    .then((user) => res.status(ok).send(user))
+  userModel.findById(req.user._id)
+    .then((user) => res.status(ok).send({
+      ID: user._id,
+      name: user.name,
+      about: user.about,
+      avatar: user.avatar,
+      email: user.email,
+    }))
     .catch((err) => {
       if (err.name === 'ValidationError') {
         return res.status(badRequest).send({ message: 'invalid data' });
