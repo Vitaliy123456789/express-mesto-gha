@@ -7,6 +7,7 @@ const {
 } = require('../contollers/user');
 
 router.use(auth);
+router.get('/users/me', userInfo);
 router.get('/users/:userId', celebrate({
   params: Joi.object().keys({
     userId: Joi.string().required().length(24).hex(),
@@ -24,6 +25,6 @@ router.patch('/users/me/avatar', celebrate({
     avatar: Joi.string().required().pattern(/^https?:\/\/(www\.)?[a-zA-Z\d-]+\.[\w\d\-.~:/?#[\]@!$&'()*+,;=]{2,}#?$/),
   }),
 }), patchUserAvatar);
-router.get('/users/me', userInfo);
+
 
 module.exports = router;

@@ -5,6 +5,7 @@ const ok = 200;
 const internalServerError = 500;
 const badRequest = 400;
 const created = 201;
+const forbidden = 403;
 
 const getCard = (req, res) => {
   cardModel.find()
@@ -21,7 +22,7 @@ const deleteCard = (req, res) => {
         return res.status(notFound).send({ message: 'invalid data' });
       }
       if (userId !== card.owner.toString()) {
-        return res.status(403).send({ message: 'invalid data' });
+        return res.status(forbidden).send({ message: 'forbidden to delete other users cards' });
       }
       return res.status(ok).send(card);
     })

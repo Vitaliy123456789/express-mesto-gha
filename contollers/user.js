@@ -7,6 +7,8 @@ const ok = 200;
 const internalServerError = 500;
 const badRequest = 400;
 const created = 201;
+const conflict = 409;
+const Unauthorized = 401;
 
 const getUsers = (req, res) => {
   userModel.find().then((user) => res.status(ok).send(user))
@@ -38,7 +40,7 @@ const createUser = (req, res) => {
     name, about, avatar, email, password,
   } = req.body;
   if (!password) {
-    res.status(400).send({ message: 'invalid data' });
+    res.status(badRequest).send({ message: 'invalid data' });
   }
   bcrypt.hash(req.body.password, 10)
     .then((hash) => userModel.create({
@@ -55,9 +57,9 @@ const createUser = (req, res) => {
       if (err.name === 'ValidationError') {
         return res.status(badRequest).send({ message: 'invalid data' });
       } if (err.name === 'MongoError' || err.code === 11000) {
-        return res.status(409).send({ message: 'Указанный email уже занят' });
+        return res.status(conflict).send({ message: 'Указанный email уже занят' });
       }
-      return res.status(500).send({ message: 'На сервере произошла ошибка' });
+      return res.status(internalServerError).send({ message: 'На сервере произошла ошибка' });
     });
 };
 
@@ -114,7 +116,7 @@ const login = (req, res) => {
       res.send({ token });
     })
     .catch((err) => {
-      res.status(401).send({ message: err.message });
+      res.status(Unauthorized).send({ message: err.message });
     });
 };
 const userInfo = (req, res) => {
