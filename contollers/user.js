@@ -1,47 +1,41 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const userModel = require('../models/user');
+const NotFound = require('../errors/notFound');
+const BadRequest = require('../errors/badRequest');
+const Conflict = require('../errors/conflict');
 
-const notFound = 404;
 const ok = 200;
-const internalServerError = 500;
-const badRequest = 400;
 const created = 201;
-const conflict = 409;
-const Unauthorized = 401;
 
-const getUsers = (req, res) => {
+const getUsers = (req, res, next) => {
   userModel.find().then((user) => res.status(ok).send(user))
-    .catch(() => {
-      res.status(internalServerError).send({ message: 'Server Error' });
-    });
+    .catch(next);
 };
 
-const getUsersById = (req, res) => {
+const getUsersById = (req, res, next) => {
   const { userId } = req.params;
   return userModel
     .findById(userId)
     .then((user) => {
       if (!user) {
-        return res.status(notFound).send({ message: 'invalid data' });
+        throw new NotFound('пользователь не существует');
       }
       return res.status(ok).send(user);
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        return res.status(badRequest).send({ message: 'invalid ID' });
+        next(new BadRequest('Передан некорректный _id пользователя.'));
+      } else {
+        next(err);
       }
-      return res.status(internalServerError).send({ message: 'Server Error' });
     });
 };
 
-const createUser = (req, res) => {
+const createUser = (req, res, next) => {
   const {
-    name, about, avatar, email, password,
+    name, about, avatar, email,
   } = req.body;
-  if (!password) {
-    res.status(badRequest).send({ message: 'invalid data' });
-  }
   bcrypt.hash(req.body.password, 10)
     .then((hash) => userModel.create({
       name,
@@ -55,15 +49,16 @@ const createUser = (req, res) => {
     }))
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        return res.status(badRequest).send({ message: 'invalid data' });
-      } if (err.name === 'MongoError' || err.code === 11000) {
-        return res.status(conflict).send({ message: 'Указанный email уже занят' });
+        next(new BadRequest('некорректные данные'));
+      } else if (err.code === 11000) {
+        next(new Conflict('email уже зарегестрирован'));
+      } else {
+        next(err);
       }
-      return res.status(internalServerError).send({ message: 'На сервере произошла ошибка' });
     });
 };
 
-const patchUser = (req, res) => {
+const patchUser = (req, res, next) => {
   const { name, about } = req.body;
   const owner = req.user._id;
   return userModel
@@ -74,37 +69,39 @@ const patchUser = (req, res) => {
     )
     .then((user) => {
       if (!user) {
-        return res.status(notFound).send({ message: 'invalid ID' });
+        throw new NotFound('пользователь не существует');
       }
       return res.status(ok).send(user);
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        return res.status(badRequest).send({ message: 'invalid data' });
+        next(new BadRequest('некорректные данные'));
+      } else {
+        next(err);
       }
-      return res.status(internalServerError).send({ message: 'Server Error' });
     });
 };
 
-const patchUserAvatar = (req, res) => {
+const patchUserAvatar = (req, res, next) => {
   const { avatar } = req.body;
   const owner = req.user._id;
   return userModel
     .findByIdAndUpdate(owner, { avatar }, { new: true, runValidators: true })
     .then((user) => {
       if (!user) {
-        return res.status(notFound).send({ message: 'invalid ID' });
+        throw new NotFound('пользователь не существует');
       }
       return res.status(ok).send(user);
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        return res.status(badRequest).send({ message: 'invalid data' });
+        next(new BadRequest('некорректные данные'));
+      } else {
+        next(err);
       }
-      return res.status(internalServerError).send({ message: 'Server Error' });
     });
 };
-const login = (req, res) => {
+const login = (req, res, next) => {
   const { email, password } = req.body;
   return userModel.findUserByCredentials(email, password)
     .then((user) => {
@@ -115,11 +112,9 @@ const login = (req, res) => {
       });
       res.send({ token });
     })
-    .catch((err) => {
-      res.status(Unauthorized).send({ message: err.message });
-    });
+    .catch(next);
 };
-const userInfo = (req, res) => {
+const userInfo = (req, res, next) => {
   userModel.findById(req.user._id)
     .then((user) => res.status(ok).send({
       ID: user._id,
@@ -130,9 +125,10 @@ const userInfo = (req, res) => {
     }))
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        return res.status(badRequest).send({ message: 'invalid data' });
+        next(new BadRequest('некорректные данные'));
+      } else {
+        next(err);
       }
-      return res.status(internalServerError).send({ message: 'Server Error' });
     });
 };
 
