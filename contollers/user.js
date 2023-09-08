@@ -4,6 +4,7 @@ const userModel = require('../models/user');
 const NotFound = require('../errors/notFound');
 const BadRequest = require('../errors/badRequest');
 const Conflict = require('../errors/conflict');
+const Unauthorized = require('../errors/Unauthorize');
 
 const ok = 200;
 const created = 201;
@@ -112,7 +113,13 @@ const login = (req, res, next) => {
       });
       res.send({ token });
     })
-    .catch(next);
+    .catch((err) => {
+      if (err.name === 'ValidationError') {
+        next(new BadRequest('некорректные данные'));
+      } else {
+        next(err);
+      }
+    });
 };
 const userInfo = (req, res, next) => {
   userModel.findById(req.user._id)
@@ -123,12 +130,8 @@ const userInfo = (req, res, next) => {
       avatar: user.avatar,
       email: user.email,
     }))
-    .catch((err) => {
-      if (err.name === 'ValidationError') {
-        next(new BadRequest('некорректные данные'));
-      } else {
-        next(err);
-      }
+    .catch(() => {
+      next(new Unauthorized('Необходима авторизация.'));
     });
 };
 
@@ -141,3 +144,4 @@ module.exports = {
   login,
   userInfo,
 };
+
