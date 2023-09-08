@@ -113,12 +113,8 @@ const login = (req, res, next) => {
       });
       res.send({ token });
     })
-    .catch((err) => {
-      if (err.name === 'ValidationError') {
-        next(new BadRequest('некорректные данные'));
-      } else {
-        next(err);
-      }
+    .catch(() => {
+      next(new Unauthorized('Необходима авторизация.'));
     });
 };
 const userInfo = (req, res, next) => {
@@ -130,8 +126,12 @@ const userInfo = (req, res, next) => {
       avatar: user.avatar,
       email: user.email,
     }))
-    .catch(() => {
-      next(new Unauthorized('Необходима авторизация.'));
+    .catch((err) => {
+      if (err.name === 'ValidationError') {
+        next(new BadRequest('некорректные данные'));
+      } else {
+        next(err);
+      }
     });
 };
 
@@ -144,4 +144,3 @@ module.exports = {
   login,
   userInfo,
 };
-
